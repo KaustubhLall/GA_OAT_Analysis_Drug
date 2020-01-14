@@ -2,10 +2,18 @@ import os
 
 import neat
 import sklearn.metrics.roc_auc_score as auc
+from sklearn.ensemble import RandomForestClassifier
 
 from module import visualize
 
 os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
+
+random_forest_config_parameters = {
+    'n_estimators': 100,  # default value
+    'criterion'   : 'entropy',
+    'n_jobs'      : -1,  # multi-processor speedup
+
+    }
 
 
 # todo
@@ -51,18 +59,29 @@ def find_error(net):
     it through a random forest classifiers, and then check the accuracy of
     the output of the random forest using the features engineered by the GA.
 
-    This function is only used to train.
-
     :param net: The neural net that will be engineering the features for a
     specific genome.
     :return: error of the genome.
     """
     train_data, train_labels = get_train_data()
 
-    predictions = list(map(net.activate, train_data))
+    engineered_features = list(map(net.activate, train_data))
+
+    clf = RandomForestClassifier(**random_forest_config_parameters)
+
+    # train the model
+    clf.fit(engineered_features, train_labels)
+
+    # test the model
+    test_data, test_labels = get_test_data()
+    test_features_engineered = list(map(net.activate, test_data))
+
+    predictions = clf.predict(test_features_engineered)
+
     # error is the auc ove-versus-rest. To be deemed correct, the label must
     # exactly match
-    error = auc(predictions, train_labels, multi_class='ovr')
+    error = auc(predictions, test_labels, multi_class='ovr')
+
     return error
 
 
