@@ -4,6 +4,10 @@ from sklearn.preprocessing import StandardScaler
 
 
 class DataLoaderMetabolite:
+    """
+    Had methods for loading in the three datasets.
+
+    """
 
     def __init__(self, scale=False):
         """

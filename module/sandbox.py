@@ -1,16 +1,22 @@
-import neat
-from module import visualize
 import os
+
+import neat
+import sklearn.metrics.roc_auc_score as auc
+
+from module import visualize
 
 os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 
 
+# todo
 def get_train_data():
-    pass
+    return None, None
 
 
+# todo
 def get_test_data():
-    pass
+    return None, None
+
 
 # todo replace this error function
 def sd(a, b):
@@ -26,7 +32,8 @@ def msd_list(a, b):
 
 
 def create_config(conf_file):
-    # have everything set to default settings for now, can technically change the config file.
+    # have everything set to default settings for now, can technically change
+    # the config file.
     return neat.config.Config(
         neat.DefaultGenome,
         neat.DefaultReproduction,
@@ -36,6 +43,29 @@ def create_config(conf_file):
         )
 
 
+def find_error(net):
+    """
+    This function takes in a net, runs it on the training input and compares the
+    accuracy with the training output.
+    To run it on the training input, we take the output of the net, and run
+    it through a random forest classifiers, and then check the accuracy of
+    the output of the random forest using the features engineered by the GA.
+
+    This function is only used to train.
+
+    :param net: The neural net that will be engineering the features for a
+    specific genome.
+    :return: error of the genome.
+    """
+    train_data, train_labels = get_train_data()
+
+    predictions = list(map(net.activate, train_data))
+    # error is the auc ove-versus-rest. To be deemed correct, the label must
+    # exactly match
+    error = auc(predictions, train_labels, multi_class='ovr')
+    return error
+
+
 def fitness(genomes, conf):
     train_input, train_output = get_train_data()
 
@@ -43,10 +73,9 @@ def fitness(genomes, conf):
         genome.fitness = len(train_input)
         net = neat.nn.FeedForwardNetwork.create(genome, conf)
 
-        for xi, xo in zip(train_input, train_output):
-            pred = net.activate(xi)
-            genome.fitness -= sd(pred[0], xo)
-            # print('fitness of', gid, 'is', sd(pred[0], xo))
+        error = find_error(net)
+        # todo ensure output of auc is under 1.
+        genome.fitness = 1 - error
 
 
 def run(epochs):
@@ -80,7 +109,9 @@ def run(epochs):
 
     for xi, xo in zip(get_test_data()):
         output = winner_net.activate(xi)
-        print("input {!r}, expected output {!r}, got {!r}".format(xi, xo, output), end='')
+        print(
+            "input {!r}, expected output {!r}, got {!r}".format(xi, xo, output),
+            end='')
         if output[0] > 0.6:
             output = 1
         else:
