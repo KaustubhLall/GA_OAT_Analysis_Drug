@@ -1,6 +1,61 @@
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+
+
+def split_metabolite_oat1_small(split=0.8):
+    """
+    Splits and loads in the small oat1-oat3 metabolite dataset.
+    :param split: size of training set split.
+    :return: training data, training labels, test data, test labels, names of features
+    """
+    dat = DataLoaderMetabolite()
+
+    assert 0 < split < 1
+
+    X, Y, header = dat.load_oat1_3_small()
+
+    train_data, train_labels, test_data, test_labels = \
+        train_test_split(X, Y, train_size=split, shuffle=True)
+
+    return train_data, train_labels, test_data, test_labels, header
+
+
+def split_metabolite_oat1_big(split=0.8):
+    """
+    Splits and loads in the large oat1-oat3 metabolite dataset.
+    :param split: size of training set split.
+    :return: training data, training labels, test data, test labels, names of features
+    """
+    dat = DataLoaderMetabolite()
+
+    assert 0 < split < 1
+
+    X, Y, header = dat.load_oat1_3_big()
+
+    train_data, train_labels, test_data, test_labels = \
+        train_test_split(X, Y, train_size=split, shuffle=True)
+
+    return train_data, train_labels, test_data, test_labels, header
+
+
+def split_metabolite_oat1_all(split=0.8):
+    """
+    Splits and loads in the combined oat1-oat3 metabolite dataset.
+    :param split: size of training set split.
+    :return: training data, training labels, test data, test labels, names of features
+    """
+    dat = DataLoaderMetabolite()
+
+    assert 0 < split < 1
+
+    X, Y, header = dat.load_oat1_3_p_combined()
+
+    train_data, train_labels, test_data, test_labels = \
+        train_test_split(X, Y, train_size=split, shuffle=True)
+
+    return train_data, train_labels, test_data, test_labels, header
 
 
 class DataLoaderMetabolite:
