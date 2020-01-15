@@ -85,12 +85,11 @@ class DataLoaderMetabolite:
 
         df = source_df.drop(source_df.columns[to_drop], axis=1)
 
-        print('Loaded in data, null values found: ', end=' ')
-        print(df[pd.isnull(df).any(axis=1)])
+        if df[pd.isnull(df).any(axis=1)]:
+            print('Loaded in data, null values found: ', end=' ')
+            print(df[pd.isnull(df).any(axis=1)])
 
         label_index = 1  # this is from source
-        print("Data shape: ", df.shape[0])
-
         X = np.array([np.array(df.iloc[x, :]) for x in range(df.shape[0])])
         Y = np.array(source_df.iloc[:, label_index])
 
@@ -114,12 +113,11 @@ class DataLoaderMetabolite:
         to_drop = [0, 2, 3, 4, ]
 
         df = source_df.drop(source_df.columns[to_drop], axis=1)
-
-        print('Loaded in data, null values found: ', end=' ')
-        print(df[pd.isnull(df).any(axis=1)])
+        if [pd.isnull(df).any(axis=1)]:
+            print('Loaded in data, null values found: ', end=' ')
+            print(df[pd.isnull(df).any(axis=1)])
 
         label_index = 1  # this is from source
-        print("Data shape: ", df.shape[0])
 
         X = np.array([np.array(df.iloc[x, :]) for x in range(df.shape[0])])
         Y = np.array(source_df.iloc[:, label_index])
@@ -149,11 +147,11 @@ class DataLoaderMetabolite:
 
         df = source_df.drop(source_df.columns[to_drop], axis=1)
 
-        print('Loaded in data, null values found: ', end=' ')
-        print(df[pd.isnull(df).any(axis=1)])
+        if df[pd.isnull(df).any(axis=1)]:
+            print('Loaded in data, null values found: ', end=' ')
+            print(df[pd.isnull(df).any(axis=1)])
 
         label_index = 2  # this is from source
-        print("Data shape: ", df.shape[0])
 
         X = np.array([np.array(df.iloc[x, :]) for x in range(df.shape[0])])
         Y = np.array(source_df.iloc[:, label_index])
