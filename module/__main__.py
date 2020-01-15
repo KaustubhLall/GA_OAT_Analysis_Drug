@@ -54,7 +54,7 @@ Response: '''
 
         """Genetic algorithm"""
         if run_selection == '2':
-            pass
+            FeatureSelectionGA.metabolite_small_dataset()
 
         """Feature engineering using GA"""
         if run_selection == '3':
@@ -70,7 +70,7 @@ Response: '''
 
         """Genetic algorithm"""
         if run_selection == '2':
-            pass
+            FeatureSelectionGA.metabolite_large_dataset()
 
         """Feature engineering using GA"""
         if run_selection == '3':
@@ -86,7 +86,7 @@ Response: '''
 
         """Genetic algorithm"""
         if run_selection == '2':
-            pass
+            FeatureSelectionGA.metabolite_combined_dataset()
 
         """Feature engineering using GA"""
         if run_selection == '3':
