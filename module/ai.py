@@ -3,8 +3,9 @@ import neat
 
 class GA:
 
-    def __init__(self, config='./configs/default.config'):
+    def __init__(self, config='./configs/default.config', checkpoint_prefix=''):
         self.conf_filepath = config
+        self.checkpoint_name_prefix = checkpoint_prefix + '.checkpoint'
 
     def create_session(self, n_epochs):
         """
@@ -27,7 +28,8 @@ class GA:
 
         # make a checkpointer to save progress every for 10 equally spaced
         # checkpoints
-        pop.add_reporter(neat.Checkpointer(n_epochs // 10))
+        pop.add_reporter(neat.Checkpointer(n_epochs // 10,
+                                           filename_prefix=self.checkpoint_name_prefix))
 
         return conf, pop, stats
 

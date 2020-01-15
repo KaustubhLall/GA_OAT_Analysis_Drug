@@ -7,12 +7,9 @@ from tqdm import tqdm
 
 from ai import *
 from dataloader import *
-from module import visualize
+import visualize
 
 os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
-
-# noinspection PyBroadException
-
 
 random_forest_config_parameters = {
     'n_estimators': 100,  # default value
@@ -22,6 +19,7 @@ random_forest_config_parameters = {
     }
 
 
+# noinspection PyBroadException
 def prompt_num_epochs():
     """
     Prompts user to enter a valid number for the number of epochs to run any
@@ -76,7 +74,7 @@ class FeatureEngineering:
         dl = DataLoaderMetabolite()
         train_data, train_labels, header = dl.load_oat1_3_small()
 
-        algo = GA('./configs/metabolite_FE.config')
+        algo = GA('./configs/metabolite_FE.config', 'metab_sm_')
         conf, pop, stats = algo.create_session(num_epochs)
 
         FeatureEngineering.acc_function = find_error_metabolite_small
@@ -107,7 +105,7 @@ class FeatureEngineering:
         dl = DataLoaderMetabolite()
         train_data, train_labels, header = dl.load_oat1_3_big()
 
-        algo = GA('./configs/metabolite_FE.config')
+        algo = GA('./configs/metabolite_FE.config', 'metab_lg_')
         conf, pop, stats = algo.create_session(num_epochs)
 
         FeatureEngineering.acc_function = find_error_metabolite_large
@@ -138,7 +136,7 @@ class FeatureEngineering:
         dl = DataLoaderMetabolite()
         train_data, train_labels, header = dl.load_oat1_3_p_combined()
 
-        algo = GA('./configs/metabolite_FE.config')
+        algo = GA('./configs/metabolite_FE.config', 'metab_cmb_')
         conf, pop, stats = algo.create_session(num_epochs)
 
         FeatureEngineering.acc_function = find_error_metabolite_large
