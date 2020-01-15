@@ -151,6 +151,13 @@ class FeatureEngineering:
 
     @staticmethod
     def fitness(genomes, conf):
+        """
+        Function calls the appropriate error function to find the fitness of
+        a given genome. Fitness in our case is defined by the AUC of the genome.
+        :param genomes: list of genomes
+        :param conf: configuration object for NEAT
+        :return: none
+        """
         for gid, genome in genomes:
             net = neat.nn.FeedForwardNetwork.create(genome, conf)
             acc = FeatureEngineering.acc_function(net)
@@ -159,6 +166,12 @@ class FeatureEngineering:
 
     @staticmethod
     def create_node_names(node_labels):
+        """
+        Takes in a list of labels and creates a dict that is used by the
+        visualization module to create names for visualization.
+        :param node_labels: strings for the features.
+        :return:
+        """
         node_list = list(range(-len(node_labels), 0))
         output_labels = ['EF_' + str(x) for x in
                          range(FeatureEngineering.output_features)]
