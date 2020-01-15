@@ -192,11 +192,11 @@ def find_error_metabolite_small(net):
 
     leave_one_out = LeaveOneOut()
 
-    err = evaluate_model_on_folds(engineered_features, leave_one_out,
+    acc = evaluate_model_on_folds(engineered_features, leave_one_out,
                                   train_data,
                                   train_labels)
 
-    return err
+    return acc
 
 
 def find_error_metabolite_large(net):
@@ -223,10 +223,10 @@ def find_error_metabolite_large(net):
 
     x_validation = KFold(n_splits=10)
 
-    err = evaluate_model_on_folds(engineered_features, x_validation, train_data,
+    acc = evaluate_model_on_folds(engineered_features, x_validation, train_data,
                                   train_labels)
 
-    return err
+    return acc
 
 
 def find_error_metabolite_combined(net):
@@ -253,14 +253,24 @@ def find_error_metabolite_combined(net):
 
     x_validation = KFold(n_splits=10)
 
-    err = evaluate_model_on_folds(engineered_features, x_validation, train_data,
+    acc = evaluate_model_on_folds(engineered_features, x_validation, train_data,
                                   train_labels)
 
-    return err
+    return acc
 
 
 def evaluate_model_on_folds(engineered_features, evaluator, train_data,
                             train_labels):
+    """
+    Finds the accuracy of a random forest model on a list of folds of the
+    training data.
+
+    :param engineered_features: input features (engineered) for the classifier.
+    :param evaluator: leave one out / cross validation folds.
+    :param train_data: training data (X)
+    :param train_labels: training labels (Y)
+    :return: accuracy of the model
+    """
     correct_count = 0  # count of how many are correct in LOO
     total_count = 0
     for train_index, test_index in tqdm(evaluator.split(train_data)):
@@ -280,5 +290,5 @@ def evaluate_model_on_folds(engineered_features, evaluator, train_data,
         total_count += 1
         # correct_count += roc_auc_score(sub_test_labels, output,
         #                                multi_class='ovr')
-    err = correct_count / total_count
-    return err
+    acc = correct_count / total_count
+    return acc
