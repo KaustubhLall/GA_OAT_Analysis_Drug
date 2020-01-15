@@ -1,5 +1,4 @@
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import LeaveOneOut
 
 from ai import *
@@ -68,7 +67,7 @@ class FeatureEngineering:
         Then, the random forest on top will use those features and get the 
         accuracy on the dataset using leave one out.        
         '''
-        algo = GA()
+        algo = GA('./configs/metabolite_small.config')
         conf, pop = algo.create_session(num_epochs)
 
         FeatureEngineering.err_function = find_error_metabolite_small
@@ -109,7 +108,7 @@ def find_error_metabolite_small(net):
     dl = DataLoaderMetabolite()
     train_data, train_labels, header = dl.load_oat1_3_small()
 
-    engineered_features = list(map(net.activate, train_data))
+    engineered_features = np.array(list(map(net.activate, train_data)))
 
     # once we have the activations for the new engineered features, we will
     # test them using leave one out for validation. We will generate as many
@@ -130,11 +129,11 @@ def find_error_metabolite_small(net):
 
         output = clf.predict(sub_test_data)
 
-        correct_count += roc_auc_score(output, sub_test_labels,
-                                       multi_class='ovr')
+        correct_count += (output == sub_test_labels)
+        total_count += 1
+        # correct_count += roc_auc_score(sub_test_labels, output,
+        #                                multi_class='ovr')
 
-    err = correct_count / total_count * 100
-
-    assert 0 < err < 1
+    err = correct_count / total_count
 
     return err
