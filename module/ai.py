@@ -28,14 +28,13 @@ class GA:
 
         # make a checkpointer to save progress every for 10 equally spaced
         # checkpoints
-        pop.add_reporter(neat.Checkpointer(n_epochs // 10,
-                                           filename_prefix=self.checkpoint_name_prefix))
+        pop.add_reporter(
+            neat.Checkpointer(n_epochs // 10,
+                              filename_prefix=self.checkpoint_name_prefix))
 
         return conf, pop, stats
 
     def create_config(cself, conf_file):
-        # have everything set to default settings for now, can technically change
-        # the config file.
         return neat.config.Config(
             neat.DefaultGenome,
             neat.DefaultReproduction,

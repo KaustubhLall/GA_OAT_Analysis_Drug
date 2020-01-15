@@ -1,13 +1,11 @@
-import concurrent
 import os
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import LeaveOneOut, KFold
-from tqdm import tqdm
 
+import visualize
 from ai import *
 from dataloader import *
-import visualize
 
 os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 
@@ -39,6 +37,24 @@ def prompt_num_epochs():
             continue
 
         return ans
+
+class FeatureSelectionGA:
+    """
+    This class will implement high level API to call the genetic algorithm
+    NEAT and run it as a classifier.
+    """
+    output_features = 6
+    acc_function = None
+
+    @staticmethod
+    def set_output_features(k):
+        """
+        Tells the class how many output features to manufacture for the RFW
+        classifier to use.
+        :param k: desired number of features.
+        :return: None.
+        """
+        FeatureEngineering.output_features = k
 
 
 class FeatureEngineering:
@@ -166,21 +182,21 @@ class FeatureEngineering:
         assert 0 <= acc <= 1, 'Got unexpected accuracy of %s' % acc
         genome.fitness = acc
 
-    @staticmethod
-    def create_node_names(node_labels):
-        """
-        Takes in a list of labels and creates a dict that is used by the
-        visualization module to create names for visualization.
-        :param node_labels: strings for the features.
-        :return:
-        """
-        node_list = list(range(-len(node_labels), 0))
-        output_labels = ['EF_' + str(x) for x in
-                         range(FeatureEngineering.output_features)]
-        output_list = list(range(len(output_labels)))
 
-        return dict(zip((list(node_list) + list(output_list)),
-                        (list(node_labels) + list(output_labels))))
+def create_node_names(node_labels):
+    """
+    Takes in a list of labels and creates a dict that is used by the
+    visualization module to create names for visualization.
+    :param node_labels: strings for the features.
+    :return:
+    """
+    node_list = list(range(-len(node_labels), 0))
+    output_labels = ['EF_' + str(x) for x in
+                     range(FeatureEngineering.output_features)]
+    output_list = list(range(len(output_labels)))
+
+    return dict(zip((list(node_list) + list(output_list)),
+                    (list(node_labels) + list(output_labels))))
 
 
 def fitness(genomes, conf):
