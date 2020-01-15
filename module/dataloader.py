@@ -42,7 +42,7 @@ def split_metabolite_oat1_big(split=0.8):
 
 def split_metabolite_oat1_all(split=0.8):
     """
-    Splits and loads in the combined oat1-oat3 metabolite dataset.
+    Splits and loads in the combined oat1-oat3-oatp metabolite dataset.
     :param split: size of training set split.
     :return: training data, training labels, test data, test labels, names of features
     """
@@ -136,8 +136,6 @@ class DataLoaderMetabolite:
         :rtype:
         """
 
-        return
-        # todo the dataset is missing a header, get the header before proceeding.
         source_df = pd.read_csv('./datasets/metabolites/OAT1OAT3OATP.csv')
         source_df['SLC'] = source_df['SLC'].astype('category').cat.codes
 

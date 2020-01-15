@@ -10,8 +10,7 @@ Type in the number of the dataset to load and run:
     
     e/q to exit.
     
-Response: 
-            '''
+Response: '''
                               )
 
     if dataset_selection.lower() in ['e', 'q']:

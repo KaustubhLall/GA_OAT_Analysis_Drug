@@ -1,3 +1,6 @@
+import concurrent
+import os
+
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import LeaveOneOut, KFold
 from tqdm import tqdm
@@ -5,6 +8,8 @@ from tqdm import tqdm
 from ai import *
 from dataloader import *
 from module import visualize
+
+os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 
 # noinspection PyBroadException
 
@@ -43,7 +48,7 @@ class FeatureEngineering:
     This class will implement high level API to call the genetic algorithm 
     NEAT and run it to engineer a set of features.
     """
-    output_features = 5
+    output_features = 6
     acc_function = None
 
     @staticmethod
@@ -76,7 +81,7 @@ class FeatureEngineering:
 
         FeatureEngineering.acc_function = find_error_metabolite_small
 
-        winner = pop.run(FeatureEngineering.fitness, num_epochs)
+        winner = pop.run(fitness, num_epochs)
 
         # Display the winning genome.
         print('\nBest genome:\n{!s}'.format(winner))
@@ -107,7 +112,7 @@ class FeatureEngineering:
 
         FeatureEngineering.acc_function = find_error_metabolite_large
 
-        winner = pop.run(FeatureEngineering.fitness, num_epochs)
+        winner = pop.run(fitness, num_epochs)
 
         # Display the winning genome.
         print('\nBest genome:\n{!s}'.format(winner))
@@ -138,7 +143,7 @@ class FeatureEngineering:
 
         FeatureEngineering.acc_function = find_error_metabolite_large
 
-        winner = pop.run(FeatureEngineering.fitness, num_epochs)
+        winner = pop.run(fitness, num_epochs)
 
         # Display the winning genome.
         print('\nBest genome:\n{!s}'.format(winner))
@@ -150,19 +155,18 @@ class FeatureEngineering:
         visualize.plot_species(stats, view=True)
 
     @staticmethod
-    def fitness(genomes, conf):
+    def run_genome(conf, genome):
         """
-        Function calls the appropriate error function to find the fitness of
-        a given genome. Fitness in our case is defined by the AUC of the genome.
-        :param genomes: list of genomes
-        :param conf: configuration object for NEAT
-        :return: none
+        Runs a single genome. This is a wrapper for async calls from fitness
+        function.
+        :param conf:
+        :param genome:
+        :return:
         """
-        for gid, genome in genomes:
-            net = neat.nn.FeedForwardNetwork.create(genome, conf)
-            acc = FeatureEngineering.acc_function(net)
-            assert 0 <= acc <= 1, 'Got unexpected accuracy of %s' % acc
-            genome.fitness = acc
+        net = neat.nn.FeedForwardNetwork.create(genome, conf)
+        acc = FeatureEngineering.acc_function(net)
+        assert 0 <= acc <= 1, 'Got unexpected accuracy of %s' % acc
+        genome.fitness = acc
 
     @staticmethod
     def create_node_names(node_labels):
@@ -177,7 +181,27 @@ class FeatureEngineering:
                          range(FeatureEngineering.output_features)]
         output_list = list(range(len(output_labels)))
 
-        return dict(zip(node_list + output_list, node_labels + output_labels))
+        return dict(zip((list(node_list) + list(output_list)),
+                        (list(node_labels) + list(output_labels))))
+
+
+def fitness(genomes, conf):
+    """
+    Function calls the appropriate error function to find the fitness of
+    a given genome. Fitness in our case is defined by the AUC of the genome.
+    :param genomes: list of genomes
+    :param conf: configuration object for NEAT
+    :return: none
+    """
+    # spawn half as many processes as there are genomes
+    # executor = concurrent.futures.ProcessPoolExecutor(5)
+    # futures = [executor.submit(FeatureEngineering.run_genome, genome) for
+    #            genome in genomes]
+    # concurrent.futures.wait(futures)
+
+    # old code
+    for gid, genome in genomes:
+        FeatureEngineering.run_genome(conf, genome)
 
 
 def find_error_metabolite_small(net):
@@ -192,8 +216,6 @@ def find_error_metabolite_small(net):
     specific genome.
     :return: error of the genome.
     """
-    correct_count = 0  # count of how many are correct in LOO
-    total_count = 0
     dl = DataLoaderMetabolite()
     train_data, train_labels, header = dl.load_oat1_3_small()
 
@@ -286,7 +308,8 @@ def evaluate_model_on_folds(engineered_features, evaluator, train_data,
     """
     correct_count = 0  # count of how many are correct in LOO
     total_count = 0
-    for train_index, test_index in tqdm(evaluator.split(train_data)):
+
+    for train_index, test_index in evaluator.split(train_data):
         clf = RandomForestClassifier(**random_forest_config_parameters)
 
         sub_train_data = engineered_features[train_index]
@@ -301,6 +324,7 @@ def evaluate_model_on_folds(engineered_features, evaluator, train_data,
 
         correct_count += auc(sub_test_labels, output)
         total_count += 1
+
     acc = correct_count / total_count
     return acc
 
