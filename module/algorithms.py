@@ -71,7 +71,7 @@ class FeatureEngineering:
         dl = DataLoaderMetabolite()
         train_data, train_labels, header = dl.load_oat1_3_small()
 
-        algo = GA('./configs/metabolite.config')
+        algo = GA('./configs/metabolite_FE.config')
         conf, pop, stats = algo.create_session(num_epochs)
 
         FeatureEngineering.acc_function = find_error_metabolite_small
@@ -102,7 +102,7 @@ class FeatureEngineering:
         dl = DataLoaderMetabolite()
         train_data, train_labels, header = dl.load_oat1_3_big()
 
-        algo = GA('./configs/metabolite.config')
+        algo = GA('./configs/metabolite_FE.config')
         conf, pop, stats = algo.create_session(num_epochs)
 
         FeatureEngineering.acc_function = find_error_metabolite_large
@@ -133,7 +133,7 @@ class FeatureEngineering:
         dl = DataLoaderMetabolite()
         train_data, train_labels, header = dl.load_oat1_3_p_combined()
 
-        algo = GA('./configs/metabolite.config')
+        algo = GA('./configs/metabolite_FE.config')
         conf, pop, stats = algo.create_session(num_epochs)
 
         FeatureEngineering.acc_function = find_error_metabolite_large
