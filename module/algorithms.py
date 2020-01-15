@@ -128,7 +128,7 @@ class FeatureSelectionGA:
         """
         net = neat.nn.FeedForwardNetwork.create(genome, conf)
         acc = FeatureSelectionGA.acc_function(net)
-        assert 0 <= acc <= 1, 'Got unexpected accuracy of %s' % acc
+        # assert 0 <= acc <= 1, 'Got unexpected accuracy of %s' % acc
         genome.fitness = acc
 
     @staticmethod
@@ -524,8 +524,8 @@ def score_multi_pred_output(predictions, train_labels):
     :param train_labels: actual expected labels.
     :return: corresponding score out of 1.0
     """
-
-    return auc(list(map(np.argmax, predictions)), train_labels)
+    score = auc(list(map(np.argmax, predictions)), train_labels)
+    return score
 
 
 def auc(real, pred):
@@ -539,11 +539,30 @@ def auc(real, pred):
 
     corr, total = 0, 0
     for r, p in zip(real, pred):
-        if r == p:
-            corr = + 1
+        corr += abs(p - r) ** 2
         total += 1
 
-    return corr / total
+    return - corr / total
+
+
+#
+# def auc(real, pred):
+#     """
+#     Find the accuracy of given predictions.
+#     :param real: real values.
+#     :param pred: predicted labels.
+#     :return: auc score.
+#     """
+#     assert len(real) == len(pred)
+#
+#     corr, total = 0, 0
+#     for r, p in zip(real, pred):
+#         if r == p:
+#             corr = + 1
+#         total += 1
+#
+#     return corr / total
+#
 
 
 # noinspection PyBroadException

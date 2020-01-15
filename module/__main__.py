@@ -95,7 +95,7 @@ Response: '''
             FeatureEngineering.metabolite_combined_dataset()
 
     action_exit = input(
-        'Finished running. Select another option to continue, or e/q to exit.')
+        'Finished running. Select enter to continue, or e/q to exit.')
 
     if action_exit.lower() in ['e', 'q']:
         break
