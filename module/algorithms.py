@@ -436,24 +436,6 @@ def feature_eng_err_metab_comb(net):
     return acc
 
 
-def score_multi_pred_output(predictions, train_labels):
-    """
-    Predictions is a nxk array where the output is true for the kth class if
-    it is the max in the column.
-
-    Ex.
-
-    [[0.5, 0.6], [0.5, 0.1]] --> [class 1, class 0] since the respective
-    argument indices are highest in the corresponding sublist.
-
-    :param predictions: list of prob distribution over the output classes.
-    :param train_labels: actual expected labels.
-    :return: corresponding score out of 1.0
-    """
-
-    return auc(list(map(np.argmax, predictions)), train_labels)
-
-
 def feature_sel_err_metab_small(net):
     """
     This function takes in a net, runs it on the training input and compares the
@@ -545,6 +527,24 @@ def evaluate_model_using_engineered_features(engineered_features, evaluator,
 
     acc = correct_count / total_count
     return acc
+
+
+def score_multi_pred_output(predictions, train_labels):
+    """
+    Predictions is a nxk array where the output is true for the kth class if
+    it is the max in the column.
+
+    Ex.
+
+    [[0.5, 0.6], [0.5, 0.1]] --> [class 1, class 0] since the respective
+    argument indices are highest in the corresponding sublist.
+
+    :param predictions: list of prob distribution over the output classes.
+    :param train_labels: actual expected labels.
+    :return: corresponding score out of 1.0
+    """
+
+    return auc(list(map(np.argmax, predictions)), train_labels)
 
 
 def auc(real, pred):
