@@ -32,7 +32,7 @@ def split_metabolite_oat1_big(split=0.8):
 
     assert 0 < split < 1
 
-    X, Y, header = dat.load_oat1_3_big()
+    X, Y, header = dat.load_oat1_3_large()
 
     train_data, train_labels, test_data, test_labels = \
         train_test_split(X, Y, train_size=split, shuffle=True)
@@ -85,7 +85,7 @@ class DataLoaderMetabolite:
         return self.process_df_for_dataset_loader(label_index, source_df,
                                                   to_drop)
 
-    def load_oat1_3_big(self):
+    def load_oat1_3_large(self):
         """
         Loads the for large fold metabolites.
         :return: X, Y, Header (names of features)
@@ -132,5 +132,5 @@ class DataLoaderMetabolite:
 
 dat = DataLoaderMetabolite()
 
-x, y, h = dat.load_oat1_3_big()
-# print(dat.load_oat1_3_big())
+x, y, h = dat.load_oat1_3_large()
+# print(dat.load_oat1_3_large())

@@ -12,7 +12,7 @@ os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 random_forest_config_parameters = {
     'n_estimators': 100,  # default value
     'criterion'   : 'entropy',
-    'n_jobs'      : -1,  # multi-processor speedup
+    # 'n_jobs'      : -1,  # multi-processor speedup
 
     }
 
@@ -62,9 +62,8 @@ class FeatureSelectionGA:
         """
         Runs the small dataset of OAT1-OAT3.
 
-        The GA will receive all the features together.
-        Then, the random forest on top will use those features and get the
-        accuracy on the dataset using leave one out.
+        The GA will receive all the features together and then use leave one
+        out to find its accuracy over given number of epochs.
         :return: None.
         """
         num_epochs = prompt_num_epochs()
@@ -72,10 +71,52 @@ class FeatureSelectionGA:
         dl = DataLoaderMetabolite()
         train_data, train_labels, header = dl.load_oat1_3_small()
 
-        algo = GA('./configs/metabolite_FE.config',
+        algo = GA('./configs/metabolite_BI.config',
                   checkpoint_prefix='GA_metab_sm_')
 
-        FeatureSelectionGA.acc_function = feature_eng_err_metab_small
+        FeatureSelectionGA.acc_function = feature_sel_err_metab_small
+
+        FeatureSelectionGA.run_session(algo, header, num_epochs)
+
+    @staticmethod
+    def metabolite_large_dataset():
+        """
+        Runs the small dataset of OAT1-OAT3.
+
+        The GA will receive all the features together and then use leave one
+        out to find its accuracy over given number of epochs.
+        :return: None.
+        """
+        num_epochs = prompt_num_epochs()
+
+        dl = DataLoaderMetabolite()
+        train_data, train_labels, header = dl.load_oat1_3_large()
+
+        algo = GA('./configs/metabolite_BI.config',
+                  checkpoint_prefix='GA_metab_lg_')
+
+        FeatureSelectionGA.acc_function = feature_sel_err_metab_large
+
+        FeatureSelectionGA.run_session(algo, header, num_epochs)
+
+    @staticmethod
+    def metabolite_combined_dataset():
+        """
+        Runs the small dataset of OAT1-OAT3.
+
+        The GA will receive all the features together and then use leave one
+        out to find its accuracy over given number of epochs.
+        :return: None.
+        """
+        num_epochs = prompt_num_epochs()
+
+        dl = DataLoaderMetabolite()
+        train_data, train_labels, header = dl.load_oat1_3_p_combined()
+
+        algo = GA('./configs/metabolite_MULTI.config',
+                  checkpoint_prefix='GA_metab_cb_')
+
+        FeatureSelectionGA.acc_function = feature_sel_err_metab_comb
 
         FeatureSelectionGA.run_session(algo, header, num_epochs)
 
@@ -89,7 +130,7 @@ class FeatureSelectionGA:
         :return: None, will open popups using visualization code.
         """
         conf, pop, stats = algorithm.create_session(num_epochs)
-        winner = pop.run(fitness, num_epochs)
+        winner = pop.run(FeatureSelectionGA.fitness, num_epochs)
         # Display the winning genome.
         print('\nBest genome:\n{!s}'.format(winner))
         visualize.draw_net(conf, winner, True,
@@ -111,6 +152,25 @@ class FeatureSelectionGA:
         acc = FeatureSelectionGA.acc_function(net)
         assert 0 <= acc <= 1, 'Got unexpected accuracy of %s' % acc
         genome.fitness = acc
+
+    @staticmethod
+    def fitness(genomes, conf):
+        """
+        Function calls the appropriate error function to find the fitness of
+        a given genome. Fitness in our case is defined by the AUC of the genome.
+        :param genomes: list of genomes
+        :param conf: configuration object for NEAT
+        :return: none
+        """
+        # spawn half as many processes as there are genomes
+        # executor = concurrent.futures.ProcessPoolExecutor(5)
+        # futures = [executor.submit(FeatureEngineering.run_genome, genome) for
+        #            genome in genomes]
+        # concurrent.futures.wait(futures)
+
+        # old code
+        for gid, genome in genomes:
+            FeatureSelectionGA.run_genome(conf, genome)
 
 
 class FeatureEngineering:
@@ -166,7 +226,7 @@ class FeatureEngineering:
         num_epochs = prompt_num_epochs()
 
         dl = DataLoaderMetabolite()
-        train_data, train_labels, header = dl.load_oat1_3_big()
+        train_data, train_labels, header = dl.load_oat1_3_large()
 
         FeatureEngineering.acc_function = feature_eng_err_metab_large
 
@@ -192,7 +252,7 @@ class FeatureEngineering:
         FeatureEngineering.acc_function = feature_eng_err_metab_comb
 
         algo = GA('./configs/metabolite_FE.config',
-                  checkpoint_prefix='FE_metab_cmb_')
+                  checkpoint_prefix='FE_metab_cb_')
         FeatureEngineering.run_session(algo, header, num_epochs)
 
     @staticmethod
@@ -205,7 +265,7 @@ class FeatureEngineering:
         :return: None, will open popups using visualization code.
         """
         conf, pop, stats = algorithm.create_session(num_epochs)
-        winner = pop.run(fitness, num_epochs)
+        winner = pop.run(FeatureEngineering.fitness, num_epochs)
         # Display the winning genome.
         print('\nBest genome:\n{!s}'.format(winner))
         visualize.draw_net(conf, winner, True,
@@ -227,6 +287,25 @@ class FeatureEngineering:
         acc = FeatureEngineering.acc_function(net)
         assert 0 <= acc <= 1, 'Got unexpected accuracy of %s' % acc
         genome.fitness = acc
+
+    @staticmethod
+    def fitness(genomes, conf):
+        """
+        Function calls the appropriate error function to find the fitness of
+        a given genome. Fitness in our case is defined by the AUC of the genome.
+        :param genomes: list of genomes
+        :param conf: configuration object for NEAT
+        :return: none
+        """
+        # spawn half as many processes as there are genomes
+        # executor = concurrent.futures.ProcessPoolExecutor(5)
+        # futures = [executor.submit(FeatureEngineering.run_genome, genome) for
+        #            genome in genomes]
+        # concurrent.futures.wait(futures)
+
+        # old code
+        for gid, genome in genomes:
+            FeatureEngineering.run_genome(conf, genome)
 
 
 def create_node_names(node_labels):
@@ -287,9 +366,10 @@ def feature_eng_err_metab_small(net):
 
     leave_one_out = LeaveOneOut()
 
-    acc = evaluate_model_on_folds(engineered_features, leave_one_out,
-                                  train_data,
-                                  train_labels)
+    acc = evaluate_model_using_engineered_features(engineered_features,
+                                                   leave_one_out,
+                                                   train_data,
+                                                   train_labels)
 
     return acc
 
@@ -308,7 +388,7 @@ def feature_eng_err_metab_large(net):
     """
 
     dl = DataLoaderMetabolite()
-    train_data, train_labels, header = dl.load_oat1_3_big()
+    train_data, train_labels, header = dl.load_oat1_3_large()
 
     engineered_features = np.array(list(map(net.activate, train_data)))
 
@@ -318,8 +398,9 @@ def feature_eng_err_metab_large(net):
 
     x_validation = KFold(n_splits=10)
 
-    acc = evaluate_model_on_folds(engineered_features, x_validation, train_data,
-                                  train_labels)
+    acc = evaluate_model_using_engineered_features(engineered_features,
+                                                   x_validation, train_data,
+                                                   train_labels)
 
     return acc
 
@@ -348,14 +429,91 @@ def feature_eng_err_metab_comb(net):
 
     x_validation = KFold(n_splits=10)
 
-    acc = evaluate_model_on_folds(engineered_features, x_validation, train_data,
-                                  train_labels)
+    acc = evaluate_model_using_engineered_features(engineered_features,
+                                                   x_validation, train_data,
+                                                   train_labels)
 
     return acc
 
 
-def evaluate_model_on_folds(engineered_features, evaluator, train_data,
-                            train_labels):
+def score_multi_pred_output(predictions, train_labels):
+    """
+    Predictions is a nxk array where the output is true for the kth class if
+    it is the max in the column.
+
+    Ex.
+
+    [[0.5, 0.6], [0.5, 0.1]] --> [class 1, class 0] since the respective
+    argument indices are highest in the corresponding sublist.
+
+    :param predictions: list of prob distribution over the output classes.
+    :param train_labels: actual expected labels.
+    :return: corresponding score out of 1.0
+    """
+
+    return auc(list(map(np.argmax, predictions)), train_labels)
+
+
+def feature_sel_err_metab_small(net):
+    """
+    This function takes in a net, runs it on the training input and compares the
+    accuracy with the training output.
+
+    :param net: The neural net that will be selecting the features for a
+    specific genome.
+    :return: error of the genome.
+    """
+    dl = DataLoaderMetabolite()
+    train_data, train_labels, header = dl.load_oat1_3_small()
+
+    # activate the net for the training data
+
+    predictions = np.array(list(map(net.activate, train_data)))
+
+    return score_multi_pred_output(predictions, train_labels)
+
+
+def feature_sel_err_metab_large(net):
+    """
+    This function takes in a net, runs it on the training input and compares the
+    accuracy with the training output.
+
+    :param net: The neural net that will be selecting the features for a
+    specific genome.
+    :return: error of the genome.
+    """
+    dl = DataLoaderMetabolite()
+    train_data, train_labels, header = dl.load_oat1_3_large()
+
+    # activate the net for the training data
+
+    predictions = np.array(list(map(net.activate, train_data)))
+
+    return score_multi_pred_output(predictions, train_labels)
+
+
+def feature_sel_err_metab_comb(net):
+    """
+    This function takes in a net, runs it on the training input and compares the
+    accuracy with the training output.
+
+    :param net: The neural net that will be selecting the features for a
+    specific genome.
+    :return: error of the genome.
+    """
+    dl = DataLoaderMetabolite()
+    train_data, train_labels, header = dl.load_oat1_3_p_combined()
+
+    # activate the net for the training data
+
+    predictions = np.array(list(map(net.activate, train_data)))
+
+    return score_multi_pred_output(predictions, train_labels)
+
+
+def evaluate_model_using_engineered_features(engineered_features, evaluator,
+                                             train_data,
+                                             train_labels):
     """
     Finds the accuracy of a random forest model on a list of folds of the
     training data.
