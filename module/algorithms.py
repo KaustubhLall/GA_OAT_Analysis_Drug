@@ -154,7 +154,7 @@ class FeatureEngineering:
         for gid, genome in genomes:
             net = neat.nn.FeedForwardNetwork.create(genome, conf)
             acc = FeatureEngineering.acc_function(net)
-            assert 0 < acc < 1, 'Got unexpected accuracy of %s' % acc
+            assert 0 <= acc <= 1, 'Got unexpected accuracy of %s' % acc
             genome.fitness = acc
 
     @staticmethod
@@ -286,9 +286,25 @@ def evaluate_model_on_folds(engineered_features, evaluator, train_data,
 
         output = clf.predict(sub_test_data)
 
-        correct_count += (output == sub_test_labels)
+        correct_count += auc(sub_test_labels, output)
         total_count += 1
-        # correct_count += roc_auc_score(sub_test_labels, output,
-        #                                multi_class='ovr')
     acc = correct_count / total_count
     return acc
+
+
+def auc(real, pred):
+    """
+    Find the accuracy of given predictions.
+    :param real: real values.
+    :param pred: predicted labels.
+    :return: auc score.
+    """
+    assert len(real) == len(pred)
+
+    corr, total = 0, 0
+    for r, p in zip(real, pred):
+        if r == p:
+            corr = + 1
+        total += 1
+
+    return corr / total
