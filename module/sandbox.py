@@ -3,8 +3,9 @@ import os
 import neat
 import sklearn.metrics.roc_auc_score as auc
 from sklearn.ensemble import RandomForestClassifier
-from .dataloader import *
+
 from module import visualize
+from .dataloader import *
 
 os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 
@@ -15,7 +16,9 @@ random_forest_config_parameters = {
 
     }
 
-train_data, train_labels, test_data, test_labels, header = split_metabolite_oat1_big()
+train_data, train_labels, test_data, test_labels, header = \
+    split_metabolite_oat1_big()
+
 
 # todo
 def get_train_data():
