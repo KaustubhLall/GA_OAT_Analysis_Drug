@@ -78,27 +78,12 @@ class DataLoaderMetabolite:
         :return: X, Y, Header (names of features)
         :rtype:
         """
-        source_df = pd.read_csv('./datasets/metabolites/OAT1OAT3Small.csv')
-        source_df['SLC'] = source_df['SLC'].astype('category').cat.codes
-
         to_drop = [0, 2, 3, 4, ]
-
-        df = source_df.drop(source_df.columns[to_drop], axis=1)
-
-        # print('Loaded in data, null values found: ', end=' ')
-        # print(df[pd.isnull(df).any(axis=1)])
-
         label_index = 1  # this is from source
-        X = np.array([np.array(df.iloc[x, :]) for x in range(df.shape[0])])
-        Y = np.array(source_df.iloc[:, label_index])
 
-        header = np.array(df.columns)
-
-        if self.scale:
-            feature_scaler = StandardScaler()
-            X = feature_scaler.transform(X)
-
-        return X, Y, header
+        source_df = pd.read_csv('./datasets/metabolites/OAT1OAT3Small.csv')
+        return self.process_df_for_dataset_loader(label_index, source_df,
+                                                  to_drop)
 
     def load_oat1_3_big(self):
         """
@@ -106,28 +91,12 @@ class DataLoaderMetabolite:
         :return: X, Y, Header (names of features)
         :rtype:
         """
-        source_df = pd.read_csv('./datasets/metabolites/OAT1OAT3Big.csv')
-        source_df['SLC'] = source_df['SLC'].astype('category').cat.codes
-
         to_drop = [0, 2, 3, 4, ]
-
-        df = source_df.drop(source_df.columns[to_drop], axis=1)
-
-        # print('Loaded in data, null values found: ', end=' ')
-        # print(df[pd.isnull(df).any(axis=1)])
-
         label_index = 1  # this is from source
 
-        X = np.array([np.array(df.iloc[x, :]) for x in range(df.shape[0])])
-        Y = np.array(source_df.iloc[:, label_index])
-
-        header = np.array(df.columns)
-
-        if self.scale:
-            feature_scaler = StandardScaler()
-            X = feature_scaler.transform(X)
-
-        return X, Y, header
+        source_df = pd.read_csv('./datasets/metabolites/OAT1OAT3Big.csv')
+        return self.process_df_for_dataset_loader(label_index, source_df,
+                                                  to_drop)
 
     def load_oat1_3_p_combined(self):
         """
@@ -135,29 +104,29 @@ class DataLoaderMetabolite:
         :return: X, Y, Header (names of features)
         :rtype:
         """
-
-        source_df = pd.read_csv('./datasets/metabolites/OAT1OAT3OATP.csv')
-        source_df['SLC'] = source_df['SLC'].astype('category').cat.codes
-
-        # todo update this
-        to_drop = [0, 1, 3, 4, ]
-
-        df = source_df.drop(source_df.columns[to_drop], axis=1)
-
-        # print('Loaded in data, null values found: ', end=' ')
-        # print(df[pd.isnull(df).any(axis=1)])
-
+        to_drop = [0, 1, 3, 4, 5, ]
         label_index = 2  # this is from source
 
+        source_df = pd.read_csv('./datasets/metabolites/OAT1OAT3OATP.csv')
+        return self.process_df_for_dataset_loader(label_index, source_df,
+                                                  to_drop)
+
+    def process_df_for_dataset_loader(self, label_index, source_df, to_drop):
+        """
+        Code to process, scale and clean a csv file loaded in as a dataset.
+        :param label_index: index where the label is stored.
+        :param source_df: dataframe to get for parsing.
+        :param to_drop: indices of the columns to drop from source.
+        :return: X, Y and feature names (header) of the csv after dropping
+        """
+        source_df['SLC'] = source_df['SLC'].astype('category').cat.codes
+        df = source_df.drop(source_df.columns[to_drop], axis=1)
         X = np.array([np.array(df.iloc[x, :]) for x in range(df.shape[0])])
         Y = np.array(source_df.iloc[:, label_index])
-
         header = np.array(df.columns)
-
         if self.scale:
             feature_scaler = StandardScaler()
             X = feature_scaler.transform(X)
-
         return X, Y, header
 
 
