@@ -1,3 +1,5 @@
+assert False, """REFERENCE FILE, DEPRECATED. DO NOT ATTEMPT TO RUN"""
+
 import os
 
 import neat
@@ -14,17 +16,14 @@ train_data, train_labels, test_data, test_labels, header = \
     split_metabolite_oat1_big()
 
 
-# todo
 def get_train_data():
     return None, None
 
 
-# todo
 def get_test_data():
     return None, None
 
 
-# todo replace this error function
 def sd(a, b):
     if isinstance(a, list) and isinstance(b, list):
         return msd_list(a, b)
