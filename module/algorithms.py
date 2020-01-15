@@ -17,28 +17,6 @@ random_forest_config_parameters = {
     }
 
 
-# noinspection PyBroadException
-def prompt_num_epochs():
-    """
-    Prompts user to enter a valid number for the number of epochs to run any
-    code.
-    :return: number of epochs, less than 100,000.
-    """
-    while True:
-        ans = input('Enter the number of epochs to run the selection for: ')
-
-        try:
-            ans = int(ans)
-
-            assert 0 < ans < 1e6
-
-        except:
-            print('Please supply a valid integer input less than 100,000.')
-            continue
-
-        return ans
-
-
 class FeatureSelectionGA:
     """
     This class will implement high level API to call the genetic algorithm
@@ -206,10 +184,10 @@ class FeatureEngineering:
         dl = DataLoaderMetabolite()
         train_data, train_labels, header = dl.load_oat1_3_small()
 
+        FeatureEngineering.acc_function = feature_eng_err_metab_small
+
         algo = GA('./configs/metabolite_FE.config',
                   checkpoint_prefix='FE_metab_sm_')
-
-        FeatureEngineering.acc_function = feature_eng_err_metab_small
 
         FeatureEngineering.run_session(algo, header, num_epochs)
 
@@ -228,10 +206,11 @@ class FeatureEngineering:
         dl = DataLoaderMetabolite()
         train_data, train_labels, header = dl.load_oat1_3_large()
 
-        FeatureEngineering.acc_function = feature_eng_err_metab_large
-
         algo = GA('./configs/metabolite_FE.config',
                   checkpoint_prefix='FE_metab_lg_')
+
+        FeatureEngineering.acc_function = feature_eng_err_metab_large
+
         FeatureEngineering.run_session(algo, header, num_epochs)
 
     @staticmethod
@@ -534,6 +513,8 @@ def score_multi_pred_output(predictions, train_labels):
     Predictions is a nxk array where the output is true for the kth class if
     it is the max in the column.
 
+    Todo : should probably replace this with softmax accuracy.
+
     Ex.
 
     [[0.5, 0.6], [0.5, 0.1]] --> [class 1, class 0] since the respective
@@ -563,3 +544,24 @@ def auc(real, pred):
         total += 1
 
     return corr / total
+
+
+# noinspection PyBroadException
+def prompt_num_epochs():
+    """
+    Prompts user to enter a valid number for the number of epochs to run any
+    code.
+    :return: number of epochs, less than 100,000.
+    """
+    while True:
+        ans = input('Enter the number of epochs to run the selection for: ')
+
+        try:
+            ans = int(ans)
+            assert 0 < ans < 1e6
+
+        except:
+            print('Please supply a valid integer input less than 100,000.')
+            continue
+
+        return ans
