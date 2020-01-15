@@ -1,5 +1,6 @@
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import LeaveOneOut
+from sklearn.model_selection import LeaveOneOut, KFold
+from tqdm import tqdm
 
 from ai import *
 from dataloader import *
@@ -43,7 +44,7 @@ class FeatureEngineering:
     NEAT and run it to engineer a set of features.
     """
     output_features = 5
-    err_function = None
+    acc_function = None
 
     @staticmethod
     def set_output_features(k):
@@ -59,22 +60,21 @@ class FeatureEngineering:
     def metabolite_small_dataset():
         """
         Runs the small dataset of OAT1-OAT3.
+
+        The GA will receive all the features together.
+        Then, the random forest on top will use those features and get the
+        accuracy on the dataset using leave one out.
         :return: None.
         """
         num_epochs = prompt_num_epochs()
 
-        '''
-        The GA will recieve all the features together.
-        Then, the random forest on top will use those features and get the 
-        accuracy on the dataset using leave one out.        
-        '''
         dl = DataLoaderMetabolite()
         train_data, train_labels, header = dl.load_oat1_3_small()
 
-        algo = GA('./configs/metabolite_small.config')
+        algo = GA('./configs/metabolite.config')
         conf, pop, stats = algo.create_session(num_epochs)
 
-        FeatureEngineering.err_function = find_error_metabolite_small
+        FeatureEngineering.acc_function = find_error_metabolite_small
 
         winner = pop.run(FeatureEngineering.fitness, num_epochs)
 
@@ -89,19 +89,73 @@ class FeatureEngineering:
 
     @staticmethod
     def metabolite_large_dataset():
-        pass
+        """
+        Runs the large dataset of OAT1-OAT3.
+
+        The GA will receive all the features together.
+        Then, the random forest on top will use those features and get the
+        accuracy on the dataset using 10-fold-cross validation.
+        :return: None.
+        """
+        num_epochs = prompt_num_epochs()
+
+        dl = DataLoaderMetabolite()
+        train_data, train_labels, header = dl.load_oat1_3_big()
+
+        algo = GA('./configs/metabolite.config')
+        conf, pop, stats = algo.create_session(num_epochs)
+
+        FeatureEngineering.acc_function = find_error_metabolite_large
+
+        winner = pop.run(FeatureEngineering.fitness, num_epochs)
+
+        # Display the winning genome.
+        print('\nBest genome:\n{!s}'.format(winner))
+
+        visualize.draw_net(conf, winner, True,
+                           node_names=FeatureEngineering.create_node_names(
+                               header))
+        visualize.plot_stats(stats, ylog=False, view=True)
+        visualize.plot_species(stats, view=True)
 
     @staticmethod
     def metabolite_combined_dataset():
-        pass
+        """
+         Runs the combined dataset of OAT1-OAT3-OATP.
+
+        The GA will receive all the features together.
+        Then, the random forest on top will use those features and get the
+        accuracy on the dataset using 10-fold-cross validation.
+         :return: None.
+         """
+        num_epochs = prompt_num_epochs()
+
+        dl = DataLoaderMetabolite()
+        train_data, train_labels, header = dl.load_oat1_3_p_combined()
+
+        algo = GA('./configs/metabolite.config')
+        conf, pop, stats = algo.create_session(num_epochs)
+
+        FeatureEngineering.acc_function = find_error_metabolite_large
+
+        winner = pop.run(FeatureEngineering.fitness, num_epochs)
+
+        # Display the winning genome.
+        print('\nBest genome:\n{!s}'.format(winner))
+
+        visualize.draw_net(conf, winner, True,
+                           node_names=FeatureEngineering.create_node_names(
+                               header))
+        visualize.plot_stats(stats, ylog=False, view=True)
+        visualize.plot_species(stats, view=True)
 
     @staticmethod
     def fitness(genomes, conf):
         for gid, genome in genomes:
             net = neat.nn.FeedForwardNetwork.create(genome, conf)
-            error = FeatureEngineering.err_function(net)
-            # todo ensure output of auc is under 1.
-            genome.fitness = 1 - error
+            acc = FeatureEngineering.acc_function(net)
+            assert 0 < acc < 1, 'Got unexpected accuracy of %s' % acc
+            genome.fitness = acc
 
     @staticmethod
     def create_node_names(node_labels):
@@ -136,9 +190,80 @@ def find_error_metabolite_small(net):
     # test them using leave one out for validation. We will generate as many
     # required folds, and take the simple average of the accuracies
 
-    loo = LeaveOneOut()
+    leave_one_out = LeaveOneOut()
 
-    for train_index, test_index in loo.split(train_data):
+    err = evaluate_model_on_folds(engineered_features, leave_one_out,
+                                  train_data,
+                                  train_labels)
+
+    return err
+
+
+def find_error_metabolite_large(net):
+    """
+    This function takes in a net, runs it on the training input and compares the
+    accuracy with the training output.
+    To run it on the training input, we take the output of the net, and run
+    it through a random forest classifiers, and then check the accuracy of
+    the output of the random forest using the features engineered by the GA.
+
+    :param net: The neural net that will be engineering the features for a
+    specific genome.
+    :return: error of the genome.
+    """
+
+    dl = DataLoaderMetabolite()
+    train_data, train_labels, header = dl.load_oat1_3_big()
+
+    engineered_features = np.array(list(map(net.activate, train_data)))
+
+    # once we have the activations for the new engineered features, we will
+    # test them using leave one out for validation. We will generate as many
+    # required folds, and take the simple average of the accuracies
+
+    x_validation = KFold(n_splits=10)
+
+    err = evaluate_model_on_folds(engineered_features, x_validation, train_data,
+                                  train_labels)
+
+    return err
+
+
+def find_error_metabolite_combined(net):
+    """
+    This function takes in a net, runs it on the training input and compares the
+    accuracy with the training output.
+    To run it on the training input, we take the output of the net, and run
+    it through a random forest classifiers, and then check the accuracy of
+    the output of the random forest using the features engineered by the GA.
+
+    :param net: The neural net that will be engineering the features for a
+    specific genome.
+    :return: error of the genome.
+    """
+
+    dl = DataLoaderMetabolite()
+    train_data, train_labels, header = dl.load_oat1_3_p_combined()
+
+    engineered_features = np.array(list(map(net.activate, train_data)))
+
+    # once we have the activations for the new engineered features, we will
+    # test them using leave one out for validation. We will generate as many
+    # required folds, and take the simple average of the accuracies
+
+    x_validation = KFold(n_splits=10)
+
+    err = evaluate_model_on_folds(engineered_features, x_validation, train_data,
+                                  train_labels)
+
+    return err
+
+
+def evaluate_model_on_folds(engineered_features, evaluator, train_data,
+                            train_labels):
+    correct_count = 0  # count of how many are correct in LOO
+    total_count = 0
+    for train_index, test_index in tqdm(evaluator.split(train_data)):
         clf = RandomForestClassifier(**random_forest_config_parameters)
 
         sub_train_data = engineered_features[train_index]
@@ -155,7 +280,5 @@ def find_error_metabolite_small(net):
         total_count += 1
         # correct_count += roc_auc_score(sub_test_labels, output,
         #                                multi_class='ovr')
-
     err = correct_count / total_count
-
     return err

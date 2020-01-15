@@ -49,12 +49,6 @@ Response:
 
     """ Run small dataset"""
     if dataset_selection == '1':
-        # run the small metabolite dataset. Error used here is going to be
-        # hold-one- out
-
-        # ask if we want to run GA, GA to feature engineer, or simple brute
-        # force
-
         """Brute force"""
         if run_selection == '1':
             pass
@@ -68,19 +62,38 @@ Response:
             print('Now running the small metabolite dataset for feature '
                   'engineering.')
             FeatureEngineering.metabolite_small_dataset()
-            pass
 
     """ Run big dataset"""
     if dataset_selection == '2':
-        # run the small metabolite dataset. Error used here is going to be
-        # 10-fold cross validation
-        pass
+        """Brute force"""
+        if run_selection == '1':
+            pass
+
+        """Genetic algorithm"""
+        if run_selection == '2':
+            pass
+
+        """Feature engineering using GA"""
+        if run_selection == '3':
+            print('Now running the small metabolite dataset for feature '
+                  'engineering.')
+            FeatureEngineering.metabolite_large_dataset()
 
     """ Run combined dataset"""
     if dataset_selection == '3':
-        # run the small metabolite dataset. Error used here is going to be
-        # 10 fold cross validation
-        pass
+        """Brute force"""
+        if run_selection == '1':
+            pass
+
+        """Genetic algorithm"""
+        if run_selection == '2':
+            pass
+
+        """Feature engineering using GA"""
+        if run_selection == '3':
+            print('Now running the small metabolite dataset for feature '
+                  'engineering.')
+            FeatureEngineering.metabolite_combined_dataset()
 
     action_exit = input(
         'Finished running. Select another option to continue, or e/q to exit.')
