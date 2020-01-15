@@ -1,4 +1,4 @@
-from .algorithms import *
+from algorithms import *
 
 while True:
     """Ask for dataset"""
@@ -21,9 +21,9 @@ Response:
         print('Select a valid option on last prompt.')
         continue
 
-    if input('You selected option {}. Proceed? (y/n)'.format(
-            dataset_selection)).lower() not in ['y', 'yes']:
-        continue
+    # if input('You selected option {}. Proceed? (y/n)'.format(
+    #         dataset_selection)).lower() not in ['y', 'yes']:
+    #     continue
 
     """ Ask for algorithm"""
     run_selection = input('''
@@ -43,9 +43,9 @@ Response:
         print('Select a valid option on last prompt.')
         continue
 
-    if input('You selected option {}. Proceed? (y/n)'.format(
-            run_selection)).lower() not in ['y', 'yes']:
-        continue
+    # if input('You selected option {}. Proceed? (y/n)'.format(
+    #         run_selection)).lower() not in ['y', 'yes']:
+    #     continue
 
     """ Run small dataset"""
     if dataset_selection == '1':
@@ -81,3 +81,9 @@ Response:
         # run the small metabolite dataset. Error used here is going to be
         # 10 fold cross validation
         pass
+
+    action_exit = input(
+        'Finished running. Select another option to continue, or e/q to exit.')
+
+    if action_exit.lower() in ['e', 'q']:
+        break

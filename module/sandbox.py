@@ -1,20 +1,14 @@
 import os
 
 import neat
-import sklearn.metrics.roc_auc_score as auc
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import roc_auc_score as auc
 
+from dataloader import *
 from module import visualize
-from .dataloader import *
 
 os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 
-random_forest_config_parameters = {
-    'n_estimators': 100,  # default value
-    'criterion'   : 'entropy',
-    'n_jobs'      : -1,  # multi-processor speedup
-
-    }
 
 train_data, train_labels, test_data, test_labels, header = \
     split_metabolite_oat1_big()
