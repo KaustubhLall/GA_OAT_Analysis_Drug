@@ -35,6 +35,7 @@ class GA:
         return conf, pop, stats
 
     def create_config(cself, conf_file):
+
         return neat.config.Config(
             neat.DefaultGenome,
             neat.DefaultReproduction,

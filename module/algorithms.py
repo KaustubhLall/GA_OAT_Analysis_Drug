@@ -38,6 +38,7 @@ def prompt_num_epochs():
 
         return ans
 
+
 class FeatureSelectionGA:
     """
     This class will implement high level API to call the genetic algorithm
@@ -55,6 +56,61 @@ class FeatureSelectionGA:
         :return: None.
         """
         FeatureEngineering.output_features = k
+
+    @staticmethod
+    def metabolite_small_dataset():
+        """
+        Runs the small dataset of OAT1-OAT3.
+
+        The GA will receive all the features together.
+        Then, the random forest on top will use those features and get the
+        accuracy on the dataset using leave one out.
+        :return: None.
+        """
+        num_epochs = prompt_num_epochs()
+
+        dl = DataLoaderMetabolite()
+        train_data, train_labels, header = dl.load_oat1_3_small()
+
+        algo = GA('./configs/metabolite_FE.config',
+                  checkpoint_prefix='GA_metab_sm_')
+
+        FeatureSelectionGA.acc_function = feature_eng_err_metab_small
+
+        FeatureSelectionGA.run_session(algo, header, num_epochs)
+
+    @staticmethod
+    def run_session(algorithm, header, num_epochs):
+        """
+        Runs a session for any dataset to do feature engineering.
+        :param algorithm: GA object to use to create the session.
+        :param header: names of input features.
+        :param num_epochs: how many epochs to run for.
+        :return: None, will open popups using visualization code.
+        """
+        conf, pop, stats = algorithm.create_session(num_epochs)
+        winner = pop.run(fitness, num_epochs)
+        # Display the winning genome.
+        print('\nBest genome:\n{!s}'.format(winner))
+        visualize.draw_net(conf, winner, True,
+                           node_names=create_node_names(
+                               header))
+        visualize.plot_stats(stats, ylog=False, view=True)
+        visualize.plot_species(stats, view=True)
+
+    @staticmethod
+    def run_genome(conf, genome):
+        """
+        Runs a single genome. This is a wrapper for async calls from fitness
+        function.
+        :param conf: configuration object.
+        :param genome: genome to run.
+        :return: None, adjusts genome fitness in place.
+        """
+        net = neat.nn.FeedForwardNetwork.create(genome, conf)
+        acc = FeatureSelectionGA.acc_function(net)
+        assert 0 <= acc <= 1, 'Got unexpected accuracy of %s' % acc
+        genome.fitness = acc
 
 
 class FeatureEngineering:
@@ -90,21 +146,12 @@ class FeatureEngineering:
         dl = DataLoaderMetabolite()
         train_data, train_labels, header = dl.load_oat1_3_small()
 
-        algo = GA('./configs/metabolite_FE.config', 'metab_sm_')
-        conf, pop, stats = algo.create_session(num_epochs)
+        algo = GA('./configs/metabolite_FE.config',
+                  checkpoint_prefix='FE_metab_sm_')
 
-        FeatureEngineering.acc_function = find_error_metabolite_small
+        FeatureEngineering.acc_function = feature_eng_err_metab_small
 
-        winner = pop.run(fitness, num_epochs)
-
-        # Display the winning genome.
-        print('\nBest genome:\n{!s}'.format(winner))
-
-        visualize.draw_net(conf, winner, True,
-                           node_names=FeatureEngineering.create_node_names(
-                               header))
-        visualize.plot_stats(stats, ylog=False, view=True)
-        visualize.plot_species(stats, view=True)
+        FeatureEngineering.run_session(algo, header, num_epochs)
 
     @staticmethod
     def metabolite_large_dataset():
@@ -121,21 +168,11 @@ class FeatureEngineering:
         dl = DataLoaderMetabolite()
         train_data, train_labels, header = dl.load_oat1_3_big()
 
-        algo = GA('./configs/metabolite_FE.config', 'metab_lg_')
-        conf, pop, stats = algo.create_session(num_epochs)
+        FeatureEngineering.acc_function = feature_eng_err_metab_large
 
-        FeatureEngineering.acc_function = find_error_metabolite_large
-
-        winner = pop.run(fitness, num_epochs)
-
-        # Display the winning genome.
-        print('\nBest genome:\n{!s}'.format(winner))
-
-        visualize.draw_net(conf, winner, True,
-                           node_names=FeatureEngineering.create_node_names(
-                               header))
-        visualize.plot_stats(stats, ylog=False, view=True)
-        visualize.plot_species(stats, view=True)
+        algo = GA('./configs/metabolite_FE.config',
+                  checkpoint_prefix='FE_metab_lg_')
+        FeatureEngineering.run_session(algo, header, num_epochs)
 
     @staticmethod
     def metabolite_combined_dataset():
@@ -152,18 +189,27 @@ class FeatureEngineering:
         dl = DataLoaderMetabolite()
         train_data, train_labels, header = dl.load_oat1_3_p_combined()
 
-        algo = GA('./configs/metabolite_FE.config', 'metab_cmb_')
-        conf, pop, stats = algo.create_session(num_epochs)
+        FeatureEngineering.acc_function = feature_eng_err_metab_comb
 
-        FeatureEngineering.acc_function = find_error_metabolite_large
+        algo = GA('./configs/metabolite_FE.config',
+                  checkpoint_prefix='FE_metab_cmb_')
+        FeatureEngineering.run_session(algo, header, num_epochs)
 
+    @staticmethod
+    def run_session(algorithm, header, num_epochs):
+        """
+        Runs a session for any dataset to do feature engineering.
+        :param algorithm: GA object to use to create the session.
+        :param header: names of input features.
+        :param num_epochs: how many epochs to run for.
+        :return: None, will open popups using visualization code.
+        """
+        conf, pop, stats = algorithm.create_session(num_epochs)
         winner = pop.run(fitness, num_epochs)
-
         # Display the winning genome.
         print('\nBest genome:\n{!s}'.format(winner))
-
         visualize.draw_net(conf, winner, True,
-                           node_names=FeatureEngineering.create_node_names(
+                           node_names=create_node_names(
                                header))
         visualize.plot_stats(stats, ylog=False, view=True)
         visualize.plot_species(stats, view=True)
@@ -173,9 +219,9 @@ class FeatureEngineering:
         """
         Runs a single genome. This is a wrapper for async calls from fitness
         function.
-        :param conf:
-        :param genome:
-        :return:
+        :param conf: configuration object.
+        :param genome: genome to run.
+        :return: None, adjusts genome fitness in place.
         """
         net = neat.nn.FeedForwardNetwork.create(genome, conf)
         acc = FeatureEngineering.acc_function(net)
@@ -218,7 +264,7 @@ def fitness(genomes, conf):
         FeatureEngineering.run_genome(conf, genome)
 
 
-def find_error_metabolite_small(net):
+def feature_eng_err_metab_small(net):
     """
     This function takes in a net, runs it on the training input and compares the
     accuracy with the training output.
@@ -248,7 +294,7 @@ def find_error_metabolite_small(net):
     return acc
 
 
-def find_error_metabolite_large(net):
+def feature_eng_err_metab_large(net):
     """
     This function takes in a net, runs it on the training input and compares the
     accuracy with the training output.
@@ -278,7 +324,7 @@ def find_error_metabolite_large(net):
     return acc
 
 
-def find_error_metabolite_combined(net):
+def feature_eng_err_metab_comb(net):
     """
     This function takes in a net, runs it on the training input and compares the
     accuracy with the training output.
