@@ -29,7 +29,7 @@ class GA:
         # checkpoints
         pop.add_reporter(neat.Checkpointer(n_epochs // 10))
 
-        return conf, pop
+        return conf, pop, stats
 
     def create_config(cself, conf_file):
         # have everything set to default settings for now, can technically change

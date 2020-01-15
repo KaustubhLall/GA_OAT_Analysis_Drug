@@ -3,6 +3,7 @@ from sklearn.model_selection import LeaveOneOut
 
 from ai import *
 from dataloader import *
+from module import visualize
 
 # noinspection PyBroadException
 
@@ -67,12 +68,24 @@ class FeatureEngineering:
         Then, the random forest on top will use those features and get the 
         accuracy on the dataset using leave one out.        
         '''
+        dl = DataLoaderMetabolite()
+        train_data, train_labels, header = dl.load_oat1_3_small()
+
         algo = GA('./configs/metabolite_small.config')
-        conf, pop = algo.create_session(num_epochs)
+        conf, pop, stats = algo.create_session(num_epochs)
 
         FeatureEngineering.err_function = find_error_metabolite_small
 
         winner = pop.run(FeatureEngineering.fitness, num_epochs)
+
+        # Display the winning genome.
+        print('\nBest genome:\n{!s}'.format(winner))
+
+        visualize.draw_net(conf, winner, True,
+                           node_names=FeatureEngineering.create_node_names(
+                               header))
+        visualize.plot_stats(stats, ylog=False, view=True)
+        visualize.plot_species(stats, view=True)
 
     @staticmethod
     def metabolite_large_dataset():
@@ -89,6 +102,15 @@ class FeatureEngineering:
             error = FeatureEngineering.err_function(net)
             # todo ensure output of auc is under 1.
             genome.fitness = 1 - error
+
+    @staticmethod
+    def create_node_names(node_labels):
+        node_list = list(range(-len(node_labels), 0))
+        output_labels = ['EF_' + str(x) for x in
+                         range(FeatureEngineering.output_features)]
+        output_list = list(range(len(output_labels)))
+
+        return dict(zip(node_list + output_list, node_labels + output_labels))
 
 
 def find_error_metabolite_small(net):
