@@ -53,7 +53,7 @@ class BruteForceMetabolite:
         print('Running brute force for the small oat 1 - 3 metabolite dataset.')
         dl = DataLoaderMetabolite()
         data, labels, header = dl.load_oat1_3_small()
-        evaluator = LeaveOneOut()
+        evaluator = KFold(n_splits=10)
         k = prompt_num_features()
 
         outfile = open('output' + os.sep + 'BF_metab_sm_raw_%s.csv' % k, 'w',
