@@ -80,7 +80,6 @@ class DataLoaderMetabolite:
         """
         to_drop = [0, 2, 3, 4, ]
         label_index = 1  # this is from source
-
         source_df = pd.read_csv('./datasets/metabolites/OAT1OAT3Small.csv')
         return self.process_df_for_dataset_loader(label_index, source_df,
                                                   to_drop)
@@ -129,8 +128,7 @@ class DataLoaderMetabolite:
             X = feature_scaler.transform(X)
         return X, Y, header
 
-
-dat = DataLoaderMetabolite()
-
-x, y, h = dat.load_oat1_3_large()
+# dat = DataLoaderMetabolite()
+#
+# x, y, h = dat.load_oat1_3_large()
 # print(dat.load_oat1_3_large())

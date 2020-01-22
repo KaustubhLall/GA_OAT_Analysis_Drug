@@ -6,7 +6,7 @@ import neat
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score as auc
 
-from dataloader import *
+from core.dataloader import *
 from module import visualize
 
 os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'

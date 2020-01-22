@@ -3,11 +3,12 @@ import os
 import neat
 
 
-class GA:
+class BaseGA:
 
     def __init__(self, config='./configs/default.config', checkpoint_prefix=''):
         self.conf_filepath = config
-        self.checkpoint_name_prefix = 'output' + os.sep + checkpoint_prefix + \
+        self.checkpoint_name_prefix = './output' + os.sep + checkpoint_prefix\
+                                      + \
                                       '.checkpoint'
 
     def create_session(self, n_epochs):

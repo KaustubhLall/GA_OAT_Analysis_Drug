@@ -1,4 +1,5 @@
-from algorithms import *
+from core.feature_engineering_GA import FeatureEngineering
+from core.feature_selection_GA import FeatureSelectionGA
 
 while True:
     """Ask for dataset"""
