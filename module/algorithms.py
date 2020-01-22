@@ -1,5 +1,3 @@
-import os
-
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import LeaveOneOut, KFold
 
@@ -16,6 +14,9 @@ random_forest_config_parameters = {
 
     }
 
+
+# todo make a readme detailing all the specifics used in each algorithm. For
+#  example for GA we do not split the dataset, etc. Document everything.
 
 class FeatureSelectionGA:
     """
@@ -149,6 +150,18 @@ class FeatureSelectionGA:
         # old code
         for gid, genome in genomes:
             FeatureSelectionGA.run_genome(conf, genome)
+
+    @staticmethod
+    def view_winner(checkpoint_file_path):
+        """
+        Gets the report for the winner from the checkpoint file pointed to.
+        :param checkpoint_file_path: filepath of checkpoint whose winner you
+        want to draw.
+        :return: none, opens files and writes to disk.
+        """
+
+        assert os._exists(checkpoint_file_path), \
+            'Enter a valid filename when calling view_winner'
 
 
 class FeatureEngineering:
@@ -524,7 +537,7 @@ def score_multi_pred_output(predictions, train_labels):
     :param train_labels: actual expected labels.
     :return: corresponding score out of 1.0
     """
-    score = auc(list(map(np.argmax, predictions)), train_labels)
+    score = auc(train_labels, list(map(np.argmax, predictions)))
     return score
 
 
@@ -535,14 +548,19 @@ def auc(real, pred):
     :param pred: predicted labels.
     :return: auc score.
     """
+    real = list(real)
+    pred = list(pred)
     assert len(real) == len(pred)
 
+    # print('real: {}\npred: {}'.format(real, pred))
     corr, total = 0, 0
+
     for r, p in zip(real, pred):
-        corr += abs(p - r) ** 2
+        # corr += abs(p - r) ** 2
+        corr += p == r
         total += 1
 
-    return - corr / total
+    return corr / total
 
 
 #
