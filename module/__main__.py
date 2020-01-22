@@ -68,7 +68,7 @@ Response: '''
     if dataset_selection == '2':
         """Brute force"""
         if run_selection == '1':
-            BruteForceMetabolite.metabolite_small_dataset()
+            BruteForceMetabolite.metabolite_large_dataset()
 
         """Genetic algorithm"""
         if run_selection == '2':

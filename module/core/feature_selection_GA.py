@@ -1,3 +1,5 @@
+import neat
+
 import visualize
 from core.dataloader import *
 from core.ga_err_functions import feature_sel_err_metab_small, \

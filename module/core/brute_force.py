@@ -40,7 +40,7 @@ def nCr(n, r):
 
 
 class BruteForceMetabolite:
-    chunk_size = 48
+    chunk_size = 10
 
     @staticmethod
     def metabolite_small_dataset():
@@ -50,14 +50,17 @@ class BruteForceMetabolite:
 
         :return: None, makes changes to disk.
         """
+        print('Running brute force for the small oat 1 - 3 metabolite dataset.')
         dl = DataLoaderMetabolite()
         data, labels, header = dl.load_oat1_3_small()
         evaluator = LeaveOneOut()
         k = prompt_num_features()
 
-        outfile = open('output' + os.sep + 'BF_metab_raw_%s' % k, 'w')
+        outfile = open('output' + os.sep + 'BF_metab_sm_raw_%s.csv' % k, 'w',
+                       newline='')
 
-        BruteForceMetabolite.run_brute_force(data, evaluator, header, labels, outfile, k)
+        BruteForceMetabolite.run_brute_force(data, evaluator, header, labels,
+                                             outfile, k)
 
     @staticmethod
     def metabolite_large_dataset():
@@ -73,14 +76,18 @@ class BruteForceMetabolite:
 
         :return: None, makes changes to disk.
         """
+        print('Running brute force for the large oat 1 - 3 metabolite dataset.')
+
         dl = DataLoaderMetabolite()
         data, labels, header = dl.load_oat1_3_large()
         evaluator = KFold(n_splits=10)
         k = prompt_num_features()
 
-        outfile = open('output' + os.sep + 'BF_metab_raw_%s' % k, 'w')
+        outfile = open('output' + os.sep + 'BF_metab_lg_raw_%s.csv' % k, 'w',
+                       newline='')
 
-        BruteForceMetabolite.run_brute_force(data, evaluator, header, labels, outfile, k)
+        BruteForceMetabolite.run_brute_force(data, evaluator, header, labels,
+                                             outfile, k)
 
     @staticmethod
     def metabolite_combined_dataset():
@@ -90,14 +97,19 @@ class BruteForceMetabolite:
 
         :return: None, makes changes to disk.
         """
+        print('Running brute force for the small oat and oatp combined '
+              'metabolite dataset.')
+
         dl = DataLoaderMetabolite()
         data, labels, header = dl.load_oat1_3_p_combined()
         evaluator = KFold(n_splits=10)
         k = prompt_num_features()
 
-        outfile = open('output' + os.sep + 'BF_metab_cm_raw_%s' % k, 'w')
+        outfile = open('output' + os.sep + 'BF_metab_cm_raw_%s.csv' % k, 'w',
+                       newline='')
 
-        BruteForceMetabolite.run_brute_force(data, evaluator, header, labels, outfile)
+        BruteForceMetabolite.run_brute_force(data, evaluator, header, labels,
+                                             outfile, k)
 
     @staticmethod
     def run_brute_force(data, evaluator, header, labels, outfile, k):
@@ -124,20 +136,21 @@ class BruteForceMetabolite:
 
             feature_names = [header[i] for i in feature_indices]
 
-            decision_tree_score = eval_classifier(data, labels,
-                                                  evaluator, classifiers[0])
             random_forest_score = eval_classifier(data, labels,
-                                                  evaluator, classifiers[1])
+                                                  evaluator, classifiers[0])
 
-            counter += 1
+            decision_tree_score = eval_classifier(data, labels,
+                                                  evaluator, classifiers[1])
 
             output_row = feature_names + [random_forest_score,
                                           decision_tree_score]
 
             output_chunk.append(output_row)
 
+            counter += 1
+
             if counter >= BruteForceMetabolite.chunk_size:
-                map(csv_writer.writerow, output_chunk)
+                list(map(csv_writer.writerow, output_chunk))
 
                 counter = 0
                 output_chunk.clear()

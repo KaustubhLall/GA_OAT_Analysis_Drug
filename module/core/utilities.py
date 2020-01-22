@@ -2,7 +2,6 @@ import os
 
 import neat
 
-from core.ai import *
 
 os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 
@@ -78,7 +77,7 @@ def prompt_num_features():
 
         try:
             ans = int(ans)
-            assert 2 < ans < 9
+            assert 0 < ans < 9
 
         except:
             print('Please supply a valid integer input less than 9.')

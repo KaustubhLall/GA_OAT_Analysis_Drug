@@ -1,3 +1,5 @@
+import neat
+
 import visualize
 from core.utilities import prompt_num_epochs, BaseGA
 from core.ga_err_functions import feature_eng_err_metab_small, \

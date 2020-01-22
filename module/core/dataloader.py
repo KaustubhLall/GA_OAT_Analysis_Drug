@@ -118,13 +118,15 @@ class DataLoaderMetabolite:
         :return: X, Y and feature names (header) of the csv after dropping
         """
         source_df['SLC'] = source_df['SLC'].astype('category').cat.codes
-        df = source_df.drop(source_df.columns[to_drop], axis=1)
+        df = source_df.drop(source_df.columns[to_drop + [label_index]], axis=1)
         X = np.array([np.array(df.iloc[x, :]) for x in range(df.shape[0])])
         Y = np.array(source_df.iloc[:, label_index])
         header = np.array(df.columns)
+
         if self.scale:
             feature_scaler = StandardScaler()
             X = feature_scaler.transform(X)
+
         return X, Y, header
 
 # dat = DataLoaderMetabolite()
