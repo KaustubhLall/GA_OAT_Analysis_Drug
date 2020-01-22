@@ -63,7 +63,6 @@ class DataLoaderMetabolite:
     Had methods for loading in the three datasets.
 
     """
-
     def __init__(self, scale=False):
         """
         Sets up a data loader object with the specified parameters.

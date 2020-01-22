@@ -1,17 +1,8 @@
 import visualize
-from core.ai import *
-from core.utilities import prompt_num_epochs
+from core.dataloader import *
 from core.ga_err_functions import feature_sel_err_metab_small, \
     feature_sel_err_metab_large, feature_sel_err_metab_comb, create_node_names
-from core.dataloader import *
-
-os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
-
-random_forest_config_parameters = {
-    'n_estimators': 100,  # default value
-    'criterion'   : 'entropy',
-    # 'n_jobs'      : -1,  # multi-processor speedup
-    }
+from core.utilities import prompt_num_epochs, BaseGA
 
 
 # todo make a readme detailing all the specifics used in each algorithm. For
@@ -21,6 +12,9 @@ class FeatureSelectionGA:
     """
     This class will implement high level API to call the genetic algorithm
     NEAT and run it as a classifier.
+
+    Loads in the entire dataset. It then uses the entire thing to train and
+    uses training accuracy as a measure of fitness.
     """
     output_features = 6
     acc_function = None
@@ -153,6 +147,7 @@ class FeatureSelectionGA:
     @staticmethod
     def view_winner(checkpoint_file_path):
         """
+        todo complete this function
         Gets the report for the winner from the checkpoint file pointed to.
         :param checkpoint_file_path: filepath of checkpoint whose winner you
         want to draw.

@@ -1,17 +1,8 @@
 import visualize
-from core.ai import *
-from core.utilities import prompt_num_epochs
+from core.utilities import prompt_num_epochs, BaseGA
 from core.ga_err_functions import feature_eng_err_metab_small, \
     feature_eng_err_metab_large, feature_eng_err_metab_comb, create_node_names
 from core.dataloader import *
-
-os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
-
-random_forest_config_parameters = {
-    'n_estimators': 100,  # default value
-    'criterion'   : 'entropy',
-    # 'n_jobs'      : -1,  # multi-processor speedup
-    }
 
 
 # todo make a readme detailing all the specifics used in each algorithm. For

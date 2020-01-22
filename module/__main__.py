@@ -1,3 +1,4 @@
+from core.brute_force import BruteForceMetabolite
 from core.feature_engineering_GA import FeatureEngineering
 from core.feature_selection_GA import FeatureSelectionGA
 
@@ -51,7 +52,7 @@ Response: '''
     if dataset_selection == '1':
         """Brute force"""
         if run_selection == '1':
-            pass
+            BruteForceMetabolite.metabolite_small_dataset()
 
         """Genetic algorithm"""
         if run_selection == '2':
@@ -67,7 +68,7 @@ Response: '''
     if dataset_selection == '2':
         """Brute force"""
         if run_selection == '1':
-            pass
+            BruteForceMetabolite.metabolite_small_dataset()
 
         """Genetic algorithm"""
         if run_selection == '2':
@@ -83,7 +84,7 @@ Response: '''
     if dataset_selection == '3':
         """Brute force"""
         if run_selection == '1':
-            pass
+            BruteForceMetabolite.metabolite_combined_dataset()
 
         """Genetic algorithm"""
         if run_selection == '2':
